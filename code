@@ -1,0 +1,117 @@
+
+
+```csharp
+using System;
+using System.Collections.Generic;
+using System.IO;
+using Newtonsoft.Json;
+
+class TaskManager
+{
+    static List<TaskItem> tasks = new List<TaskItem>();
+    const string filePath = "tasks.json";
+
+    static void Main()
+    {
+        LoadTasks();
+        while (true)
+        {
+            Console.WriteLine("\nTask Manager");
+            Console.WriteLine("1. Add Task");
+            Console.WriteLine("2. View Tasks");
+            Console.WriteLine("3. Mark Task as Completed");
+            Console.WriteLine("4. Remove Task");
+            Console.WriteLine("5. Exit");
+            Console.Write("Choose an option: ");
+            string choice = Console.ReadLine();
+
+            switch (choice)
+            {
+                case "1":
+                    AddTask();
+                    break;
+                case "2":
+                    ViewTasks();
+                    break;
+                case "3":
+                    CompleteTask();
+                    break;
+                case "4":
+                    RemoveTask();
+                    break;
+                case "5":
+                    SaveTasks();
+                    return;
+                default:
+                    Console.WriteLine("Invalid choice. Try again.");
+                    break;
+            }
+        }
+    }
+
+    static void AddTask()
+    {
+        Console.Write("Enter task description: ");
+        string description = Console.ReadLine();
+        tasks.Add(new TaskItem { Description = description, IsCompleted = false });
+        Console.WriteLine("Task added successfully.");
+    }
+
+    static void ViewTasks()
+    {
+        Console.WriteLine("\nYour Tasks:");
+        for (int i = 0; i < tasks.Count; i++)
+        {
+            Console.WriteLine($"{i + 1}. [{(tasks[i].IsCompleted ? "✔" : " ")}] {tasks[i].Description}");
+        }
+    }
+
+    static void CompleteTask()
+    {
+        ViewTasks();
+        Console.Write("Enter task number to mark as completed: ");
+        if (int.TryParse(Console.ReadLine(), out int index) && index > 0 && index <= tasks.Count)
+        {
+            tasks[index - 1].IsCompleted = true;
+            Console.WriteLine("Task marked as completed.");
+        }
+        else
+        {
+            Console.WriteLine("Invalid input.");
+        }
+    }
+
+    static void RemoveTask()
+    {
+        ViewTasks();
+        Console.Write("Enter task number to remove: ");
+        if (int.TryParse(Console.ReadLine(), out int index) && index > 0 && index <= tasks.Count)
+        {
+            tasks.RemoveAt(index - 1);
+            Console.WriteLine("Task removed.");
+        }
+        else
+        {
+            Console.WriteLine("Invalid input.");
+        }
+    }
+
+    static void SaveTasks()
+    {
+        File.WriteAllText(filePath, JsonConvert.SerializeObject(tasks));
+    }
+
+    static void LoadTasks()
+    {
+        if (File.Exists(filePath))
+        {
+            tasks = JsonConvert.DeserializeObject<List<TaskItem>>(File.ReadAllText(filePath)) ?? new List<TaskItem>();
+        }
+    }
+}
+
+class TaskItem
+{
+    public string Description { get; set; }
+    public bool IsCompleted { get; set; }
+}
